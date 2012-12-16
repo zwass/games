@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 
-module Solver where
+module Solver (SolvableGame(..), PlayableGame(..),
+               Player (..), Move, Value(..),
+               solveGame, getValue, nextPlayer,) where
 
 import qualified Data.Map as M
 import Data.Map (Map)
@@ -20,11 +22,6 @@ data Player = PlayerOne | PlayerTwo
 nextPlayer :: Player -> Player
 nextPlayer PlayerOne = PlayerTwo
 nextPlayer PlayerTwo = PlayerOne
-
-data GameState a = GameState {
-  gs :: a -- Stores state of the game. Should allow implementing game to decide
-          -- whose turn it is.
-  }
 
 type Move = Integer
 
