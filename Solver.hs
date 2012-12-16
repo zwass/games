@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 
 module Solver (SolvableGame(..), PlayableGame(..),
-               Player (..), Move, Value(..),
+               Player (..), Move, Value(..), GameTree,
                solveGame, getValue, nextPlayer,) where
 
 import qualified Data.Map as M
