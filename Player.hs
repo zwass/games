@@ -20,7 +20,7 @@ initGame :: IO ()
 initGame = do
   putStrLn "What would you like to play?"
   putStr $ unlines ["1) One, Two, Ten",
-                      "2) Tic, Tac, Toe"]
+                    "2) Tic, Tac, Toe"]
   optS <- getLine
   let opt = parseMainMenuOption optS
   case opt of
@@ -43,15 +43,15 @@ playGame = do
       PlayerTwo -> computerTurn
     Lose -> do
       lift $ putStrLn "Computer wins!"
-      lift $ putStrLn ("Board: " ++ showBoard pos)
+      lift $ putStrLn ("Board:\n" ++ showBoard pos)
       return ()
     Tie -> do
       lift $ putStrLn "It's a tie!"
-      lift $ putStrLn ("Board: " ++ showBoard pos)
+      lift $ putStrLn ("Board:\n" ++ showBoard pos)
       return ()
     Win -> do
       lift $ putStrLn "You win!"
-      lift $ putStrLn ("Board: " ++ showBoard pos)
+      lift $ putStrLn ("Board:\n" ++ showBoard pos)
       return ()
 
 humanTurn :: PlayableGame a => PlayState a ()
@@ -59,7 +59,7 @@ humanTurn = do
   s <- get
   let pos = curPos s
   let moves = generateMoves pos
-  lift $ putStrLn ("Board: " ++ showBoard pos)
+  lift $ putStr ("Board:\n" ++ showBoard pos)
   lift $ putStrLn ("Possible moves: " ++ show moves)
   move <- lift $ getMove moves
   put $ ST (tree s) (doMove pos move)
@@ -72,7 +72,7 @@ computerTurn = do
   let moves = generateMoves pos
   best <- bestMove moves pos
   put $ ST (tree s) (doMove pos best)
-  lift $ putStrLn ("Board: " ++ showBoard pos)
+  lift $ putStrLn ("Board:\n" ++ showBoard pos)
   lift $ putStrLn ("Computer chose move " ++ show best)
   playGame
   
