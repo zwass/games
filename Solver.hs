@@ -7,8 +7,6 @@ import Data.Map (Map)
 import Control.Monad.State.Lazy (State)
 import qualified Control.Monad.State as S
 
-import Debug.Trace
-
 --For storing the value of a move/state
 --Win denotes a win for player one
 --Lose denotes a win for player two
@@ -37,6 +35,10 @@ class (Ord a, Show a) => SolvableGame a where -- Parametrized by game state
   generateMoves :: a -> [Move]
   whoseTurn :: a -> Player
 
+class SolvableGame a => PlayableGame a where
+  showBoard :: a -> String
+  showMoves :: a -> String
+
 type GameTree a = Map a Value
 
 type SolverState a = State (GameTree a) Value
@@ -54,7 +56,6 @@ solveGame = S.execState (solve initialPosition) M.empty where
   solve :: SolvableGame a => a -> SolverState a
   solve pos = do
     s <- S.get
-    -- traceShow (M.size s) (return ())
     -- Try to use memoized value
     case M.lookup pos s of
       -- Just use memoized value

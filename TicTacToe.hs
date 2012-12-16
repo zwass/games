@@ -117,3 +117,7 @@ instance SolvableGame TTTBoard where
   primitive = tttPrimitive
   generateMoves = tttGenerateMoves
   whoseTurn = tttWhoseTurn
+
+instance PlayableGame TTTBoard where
+  showBoard = show
+  showMoves = show

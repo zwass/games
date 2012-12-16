@@ -20,6 +20,10 @@ instance SolvableGame OTTBoard where
   generateMoves _ = [1, 2]
   whoseTurn = turn
 
+instance PlayableGame OTTBoard where
+  showBoard = show
+  showMoves = show
+
 ottPrimitive :: OTTBoard -> Value
 ottPrimitive b
   | ottBoard b < boardSize = Undecided
