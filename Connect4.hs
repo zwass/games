@@ -3,7 +3,7 @@
 
 module Connect4 where
 
-import Data.List (transpose, group)
+import Data.List (transpose, group, intercalate)
 import Test.HUnit
 
 import Solver
@@ -16,16 +16,27 @@ instance SolvableGame C4Board where
   whoseTurn = c4WhoseTurn
 
 instance PlayableGame C4Board where
-  showBoard = show
+  showBoard b = unlines $ colMarkers : board ++ [divider] where
+    colMarkers = " " ++ intercalate " " (map show [1..boardWidth])
+    board = map (("|" ++) . (++ "|")) rows
+    maxLen = 1
+    divider = take (maxLen * boardWidth + (boardWidth + 1)) (repeat '=') ++ "\n"
+    rows = map (intercalate "|") (map (map show) $ transpose b)
+                       
   showMoves = show
 
 data Piece = R | B | E
-           deriving (Show, Eq, Ord)
+           deriving (Eq, Ord)
+
+instance Show Piece where
+  show R = "R"
+  show B = "B"
+  show E = " "
   
 type C4Board = [[Piece]]
 
 boardWidth :: Int
-boardWidth = 5
+boardWidth = 4
 
 boardHeight :: Int
 boardHeight = 4
