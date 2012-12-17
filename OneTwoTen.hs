@@ -21,7 +21,8 @@ instance SolvableGame OTTBoard where
   whoseTurn = turn
 
 instance PlayableGame OTTBoard where
-  showBoard = show
+  showBoard b = "Current: " ++ show (ottBoard b)
+                ++ " Goal: " ++ show boardSize ++ "\n"
   showMoves = show
 
 ottPrimitive :: OTTBoard -> Value
