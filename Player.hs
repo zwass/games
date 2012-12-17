@@ -9,6 +9,7 @@ import qualified Data.Map as M
 import Solver
 import OneTwoTen
 import TicTacToe
+import Connect4
 
 data ST a = ST { tree :: GameTree a, curPos :: a }
 
@@ -20,12 +21,14 @@ initGame :: IO ()
 initGame = do
   putStrLn "What would you like to play?"
   putStr $ unlines ["1) One, Two, Ten",
-                    "2) Tic, Tac, Toe"]
+                    "2) Tic, Tac, Toe",
+                    "3) Connect 4"]
   optS <- getLine
   let opt = parseMainMenuOption optS
   case opt of
     Just 1 -> evalStateT playGame (ST (solveGame :: GameTree OTTBoard) (initialPosition))
     Just 2 -> evalStateT playGame (ST (solveGame :: GameTree TTTBoard) (initialPosition))
+    Just 3 -> evalStateT playGame (ST (solveGame :: GameTree C4Board) (initialPosition))
     _ -> do { putStrLn "Unrecognized option"; initGame }
 
 parseMainMenuOption :: String -> Maybe Int
@@ -106,4 +109,4 @@ process x | x == "q" = return ()
 process x = do { lift $ putStrLn ("You said " ++ x); playGame }
 
 main :: IO ()
-main = initGame
+main = do { initGame; main }
