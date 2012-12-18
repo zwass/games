@@ -7,6 +7,7 @@ games is a library for solving and playing games.
 Compile the program via:
 
 ```
+cabal install split
 ghc --make Main.hs
 ```
 
