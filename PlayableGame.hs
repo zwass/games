@@ -1,6 +1,6 @@
 {-# LANGUAGE IncoherentInstances #-}
 
-module PlayableGame (PlayableGame(..), ST(..), playGame) where
+module PlayableGame (PlayableGame(..), ST(..), playGame, nextPos) where
 
 import Prelude as P
 import Control.Monad.State as S
@@ -9,6 +9,8 @@ import Data.Map as M
 
 import Solver
 
+nextPos :: PlayableGame a => a -> [Move] -> [(Move, a)]
+nextPos pos = P.foldr (\m xs -> (m, doMove pos m):xs) []
 
 class SolvableGame a => PlayableGame a where
   showBoard :: a -> String
@@ -16,33 +18,10 @@ class SolvableGame a => PlayableGame a where
   chooseBest :: [Move] -> a -> GameTree a -> Move
   chooseBest ms pos t = best
     where
-      nextPos = P.foldr (\m xs -> (m, doMove pos m):xs) [] ms
-      nextVals = P.map (\(m, p) -> (m, M.findWithDefault (error "Tree not fully explored") p t)) nextPos
+      nextVals = P.map (\(m, p) -> (m, M.findWithDefault (error "Tree not fully explored") p t)) (nextPos pos ms)
       (best, _) = L.minimumBy (\(_, v1) (_, v2) -> compare v1 v2) nextVals
-  {-
-  chooseBest ms pos t = case find ((== Win) . getValue . snd) (nextPos pos ms) of
-                        Nothing -> head ms
-                        Just (m, _) -> m
-  -}
 
 
-{-
-nextPos :: SolvableGame a => a -> [Move] -> [(Move, a)]
-nextPos p = foldr (\m xs -> (m, doMove p m):xs) []
--}
-
-
-
-{-
-foo t ms pos = best
-where
-  nextVals :: [(Move, Value)]
-  nextVals = map (\(m, p) ->
-                   (m, M.findWithDefault
-                       (error "Tree not fully explored")
-                       p t)) (nextPos pos ms)
-  (best, _) = L.minimumBy (\(_, v1) (_, v2) -> compare v1 v2) nextVals
--}
 data ST a = ST { tree :: GameTree a, curPos :: a }
 
 type PlayState a b = StateT (ST a) IO b
