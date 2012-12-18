@@ -3,6 +3,7 @@
 
 module Connect4 where
 
+import Data.Binary
 import Data.List (transpose, group, intercalate)
 import Test.HUnit
 
@@ -27,6 +28,18 @@ instance PlayableGame C4Board where
 
 data Piece = R | B | E
            deriving (Eq, Ord)
+
+instance Binary Piece where
+  put R = putWord8 0
+  put B = putWord8 1
+  put E = putWord8 2
+  get = do
+    tag_ <- getWord8
+    case tag_ of
+      0 -> return R
+      1 -> return B
+      2 -> return E
+      _ -> fail "no parse"
 
 instance Show Piece where
   show R = "R"

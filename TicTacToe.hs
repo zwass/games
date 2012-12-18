@@ -3,6 +3,7 @@
 
 module TicTacToe where
 
+import Data.Binary
 import Data.List
 import Data.List.Split
 
@@ -12,6 +13,19 @@ data Piece = Empty | X | O
            deriving (Show, Eq, Ord)
 
 type TTTBoard = [Piece]
+
+instance Binary Piece where
+  put Empty = putWord8 0
+  put X = putWord8 1
+  put O = putWord8 2
+  get = do
+    tag_ <- getWord8
+    case tag_ of
+      0 -> return Empty
+      1 -> return X
+      2 -> return O
+      _ -> fail "no parse"
+
 --2D should hopefully make thinking about primitive easier
 type Board2D = [[Piece]]
 
