@@ -2,8 +2,10 @@
 
 module PlayableGame (PlayableGame(..), ST(..), playGame) where
 
+import Prelude as P
 import Control.Monad.State as S
-import Data.List
+import Data.List as L
+import Data.Map as M
 
 import Solver
 
@@ -11,14 +13,23 @@ import Solver
 class SolvableGame a => PlayableGame a where
   showBoard :: a -> String
   showMoves :: a -> String
-  chooseBest :: [Move] -> a -> Move
-  chooseBest ms pos = case find ((== Win) . getValue . snd) (nextPos pos ms) of
+  chooseBest :: [Move] -> a -> GameTree a -> Move
+  chooseBest ms pos t = best
+    where
+      nextPos = P.foldr (\m xs -> (m, doMove pos m):xs) [] ms
+      nextVals = P.map (\(m, p) -> (m, M.findWithDefault (error "Tree not fully explored") p t)) nextPos
+      (best, _) = L.minimumBy (\(_, v1) (_, v2) -> compare v1 v2) nextVals
+  {-
+  chooseBest ms pos t = case find ((== Win) . getValue . snd) (nextPos pos ms) of
                         Nothing -> head ms
                         Just (m, _) -> m
+  -}
 
 
+{-
 nextPos :: SolvableGame a => a -> [Move] -> [(Move, a)]
 nextPos p = foldr (\m xs -> (m, doMove p m):xs) []
+-}
 
 
 
@@ -84,7 +95,9 @@ computerTurn = do
 -- TODO: This function is a little weird.
 -- We may want to pass the tree to chooseBest somehow...
 bestMove :: PlayableGame a => [Move] -> a -> PlayState a Move
-bestMove ms pos = return $ chooseBest ms pos
+bestMove ms pos = do
+    s <- S.get
+    return $ chooseBest ms pos (tree s)
 
 parseMove :: String -> Maybe Move
 parseMove s = case reads s of
