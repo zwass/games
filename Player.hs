@@ -10,6 +10,7 @@ import Solver
 import OneTwoTen
 import TicTacToe
 import Go
+import Connect4
 
 data ST a = ST { tree :: GameTree a, curPos :: a }
 
@@ -22,13 +23,23 @@ initGame = do
   putStrLn "What would you like to play?"
   putStr $ unlines ["1) One, Two, Ten",
                     "2) Tic, Tac, Toe",
-                    "3) Go"]
+                    "3) Connect 4",
+                    "4) Go"]
   optS <- getLine
   let opt = parseMainMenuOption optS
   case opt of
-    Just 1 -> evalStateT playGame (ST (solveGame :: GameTree OTTBoard) initialPosition)
-    Just 2 -> evalStateT playGame (ST (solveGame :: GameTree TTTBoard) initialPosition)
-    Just 3 -> evalStateT playGame (ST (solveGame :: GameTree GoGame)   initialPosition)
+    Just 1 -> do
+      t <- loadOrSolveTree "ott_tree" :: IO (GameTree OTTBoard)
+      evalStateT playGame $ ST t initialPosition
+    Just 2 -> do
+      t <- loadOrSolveTree "ttt_tree" :: IO (GameTree TTTBoard)
+      evalStateT playGame $ ST t initialPosition
+    Just 3 -> do
+      t <- loadOrSolveTree "c4_tree" :: IO (GameTree C4Board)
+      evalStateT playGame $ ST t initialPosition
+    Just 4 -> do
+      t <- loadOrSolveTree "go_tree" :: IO (GameTree GoGame)
+      evalStateT playGame $ ST t initialPosition
     _ -> do { putStrLn "Unrecognized option"; initGame }
 
 parseMainMenuOption :: String -> Maybe Int
@@ -46,15 +57,15 @@ playGame = do
       PlayerTwo -> computerTurn
     Lose -> do
       lift $ putStrLn "Computer wins!"
-      lift $ putStrLn ("Board: " ++ showBoard pos)
+      lift $ putStrLn ("Board:\n" ++ showBoard pos)
       return ()
     Tie -> do
       lift $ putStrLn "It's a tie!"
-      lift $ putStrLn ("Board: " ++ showBoard pos)
+      lift $ putStrLn ("Board:\n" ++ showBoard pos)
       return ()
     Win -> do
       lift $ putStrLn "You win!"
-      lift $ putStrLn ("Board: " ++ showBoard pos)
+      lift $ putStrLn ("Board:\n" ++ showBoard pos)
       return ()
 
 humanTurn :: PlayableGame a => PlayState a ()
@@ -62,7 +73,7 @@ humanTurn = do
   s <- get
   let pos = curPos s
   let moves = generateMoves pos
-  lift $ putStrLn ("Board: " ++ showBoard pos)
+  lift $ putStr ("Board:\n" ++ showBoard pos)
   lift $ putStrLn ("Possible moves: " ++ show moves)
   move <- lift $ getMove moves
   put $ ST (tree s) (doMove pos move)
@@ -75,7 +86,7 @@ computerTurn = do
   let moves = generateMoves pos
   best <- bestMove moves pos
   put $ ST (tree s) (doMove pos best)
-  lift $ putStrLn ("Board: " ++ showBoard pos)
+  lift $ putStrLn ("Board:\n" ++ showBoard pos)
   lift $ putStrLn ("Computer chose move " ++ show best)
   playGame
   
@@ -109,4 +120,4 @@ process x | x == "q" = return ()
 process x = do { lift $ putStrLn ("You said " ++ x); playGame }
 
 main :: IO ()
-main = initGame
+main = do { initGame; main }

@@ -3,6 +3,7 @@
 
 module TicTacToe where
 
+import Data.Binary
 import Data.List
 import Data.List.Split
 
@@ -12,20 +13,27 @@ data Piece = Empty | X | O
            deriving (Show, Eq, Ord)
 
 type TTTBoard = [Piece]
+
+instance Binary Piece where
+  put Empty = putWord8 0
+  put X = putWord8 1
+  put O = putWord8 2
+  get = do
+    tag_ <- getWord8
+    case tag_ of
+      0 -> return Empty
+      1 -> return X
+      2 -> return O
+      _ -> fail "no parse"
+
 --2D should hopefully make thinking about primitive easier
 type Board2D = [[Piece]]
-
--- ttt = Game getInitialPosition
---       (generateMoves . unhashBoard)
---       (hashBoard . doMove $ unhashBoard)
---       primitive
 
 --Store moves as the index of the move counting left to right, top to
 --bottom
 
 boardSize :: Int
 boardSize = 3
-
 
 tttGetInitialPosition :: TTTBoard
 tttGetInitialPosition = take (boardSize * boardSize) $ repeat Empty
@@ -53,8 +61,8 @@ tttDoMove b m = case (tttWhoseTurn b) of
   PlayerOne -> placePiece m X b
   PlayerTwo -> placePiece m O b
 
-boardTo2D :: TTTBoard -> Board2D
-boardTo2D = chunk boardSize
+boardTo2D :: [a] -> [[a]]
+boardTo2D = chunksOf boardSize
 
 --get all possible indices on the 2D board. This useful?
 indexPerms :: [(Int, Int)]
@@ -118,6 +126,15 @@ instance SolvableGame TTTBoard where
   generateMoves = tttGenerateMoves
   whoseTurn = tttWhoseTurn
 
+boardToString :: TTTBoard -> String
+boardToString b = intercalate divider rows where
+  divider = take (maxLen * boardSize + (boardSize - 1)) (repeat '-') ++ "\n"
+  rows' = zip [(1 :: Int)..] b
+  rows'' = map (\(n, p) -> if p == Empty then show n else show p) rows'
+  maxLen = maximum . map length $ rows''
+  rows''' = map (take maxLen . (++ repeat ' ')) rows''
+  rows = map ((++ "\n") . intercalate "|") $ boardTo2D rows'''
+
 instance PlayableGame TTTBoard where
-  showBoard = show
+  showBoard = boardToString
   showMoves = show
