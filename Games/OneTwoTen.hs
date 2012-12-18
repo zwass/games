@@ -6,7 +6,7 @@ import Data.Binary
 
 import Solver
 import PlayableGame
-import SerializableGame
+import SerializableGame()
 
 data OTTBoard = OTTBoard {turn :: Player,
                           ottBoard :: Integer}

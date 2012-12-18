@@ -63,7 +63,7 @@ tttDoMove b m = case (tttWhoseTurn b) of
   PlayerTwo -> placePiece m O b
 
 boardTo2D :: [a] -> [[a]]
-boardTo2D = splitEvery boardSize
+boardTo2D = chunksOf boardSize
 
 --get all possible indices on the 2D board. This useful?
 indexPerms :: [(Int, Int)]
