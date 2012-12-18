@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 {-# OPTIONS -Wall #-}
 
-module Go where
+module Games.Go where
 
 import Prelude as P
 import Data.List as L
@@ -229,6 +229,7 @@ instance HardGame GoGame where
 instance PlayableGame GoGame where
   showBoard = show
   showMoves = show
+  chooseBest ms _ _ = head ms
 
 
 ---
