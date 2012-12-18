@@ -1,15 +1,13 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Solver (SolvableGame(..),
                Player (..), Move, Value(..), GameTree,
                solveGame, getValue, nextPlayer) where
 
---import System.IO.Error (catchIOError)
+import Test.HUnit
 import qualified Data.Map as M
 import Data.Map (Map)
--- import qualified Data.List as L
-import Control.Monad.State.Lazy (State)
 import qualified Control.Monad.State as S
 
 --For storing the value of a move/state
@@ -38,7 +36,7 @@ class (Ord a, Show a) => SolvableGame a where -- Parametrized by game state
 
 type GameTree a = Map a Value
 
-type SolverState a = State (GameTree a) Value
+type SolverState a = S.State (GameTree a) Value
 
 playerOneMax :: [Value] -> Value
 playerOneMax vals | null vals = error "No children from non-Leaf node"
@@ -76,3 +74,16 @@ solveGame = S.execState (solve initialPosition) M.empty where
 
 getValue :: SolvableGame a => a -> Value
 getValue x = M.findWithDefault (error $ "No value for " ++ show x) x solveGame
+
+_testPlayerOneMax :: Test
+_testPlayerOneMax = TestList $
+                   [Win ~=? playerOneMax [Win, Lose, Tie],
+                    Tie ~=? playerOneMax [Lose, Lose, Tie, Lose],
+                    Lose ~=? playerOneMax [Lose, Lose]]
+
+
+_testPlayerTwoMax :: Test
+_testPlayerTwoMax = TestList $
+                   [Lose ~=? playerTwoMax [Win, Lose, Tie],
+                    Tie ~=? playerTwoMax [Win, Win, Tie, Win],
+                    Win ~=? playerTwoMax [Win, Win]]

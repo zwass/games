@@ -3,6 +3,7 @@
 
 module Games.TicTacToe where
 
+import Test.HUnit
 import Data.Binary
 import Data.List
 import Data.List.Split
@@ -10,19 +11,19 @@ import Data.List.Split
 import Solver
 import PlayableGame
 
-data Piece = Empty | X | O
+data Piece = E | X | O
            deriving (Show, Eq, Ord)
 
 type TTTBoard = [Piece]
 
 instance Binary Piece where
-  put Empty = putWord8 0
+  put E = putWord8 0
   put X = putWord8 1
   put O = putWord8 2
   get = do
     tag_ <- getWord8
     case tag_ of
-      0 -> return Empty
+      0 -> return E
       1 -> return X
       2 -> return O
       _ -> fail "no parse"
@@ -37,21 +38,21 @@ boardSize :: Int
 boardSize = 3
 
 tttGetInitialPosition :: TTTBoard
-tttGetInitialPosition = replicate (boardSize * boardSize) Empty
+tttGetInitialPosition = replicate (boardSize * boardSize) E
 
 --Returns a count of each type of piece, Xs first
 pieceCounts :: TTTBoard -> (Int, Int)
 pieceCounts = foldl'
               (\(x, o) p -> case p of X -> (x + 1, o)
                                       O -> (x, o + 1)
-                                      Empty -> (x, o))
+                                      E -> (x, o))
               (0, 0)
 
 tttWhoseTurn :: TTTBoard -> Player
 tttWhoseTurn b
-  | (fst counts) == (snd counts) = PlayerOne
+  | (fst pCounts) == (snd pCounts) = PlayerOne
   | otherwise = PlayerTwo
-                where counts = pieceCounts b
+  where pCounts = pieceCounts b
 
 --Params are index, piece type, original board
 placePiece :: Move -> Piece -> TTTBoard -> TTTBoard
@@ -105,7 +106,7 @@ getAllPossibilities b = getDiags b ++ getRows b ++ getDiags bt ++
                               br = reflect b
 
 checkTie :: TTTBoard -> Value
-checkTie b = case (Empty `elem` b) of
+checkTie b = case (E `elem` b) of
   False -> Tie
   True -> Undecided
 
@@ -117,7 +118,7 @@ tttPrimitive b = maximum $
               where b2d = boardTo2D b
 
 tttGenerateMoves :: TTTBoard -> [Move]
-tttGenerateMoves b = map fst $ filter (\(_, p) -> p == Empty) $
+tttGenerateMoves b = map fst $ filter (\(_, p) -> p == E) $
                   zip [1..] b
 
 instance SolvableGame TTTBoard where
@@ -131,7 +132,7 @@ boardToString :: TTTBoard -> String
 boardToString b = intercalate divider rows where
   divider = take (maxLen * boardSize + (boardSize - 1)) (repeat '-') ++ "\n"
   rows' = zip [(1 :: Int)..] b
-  rows'' = map (\(n, p) -> if p == Empty then show n else show p) rows'
+  rows'' = map (\(n, p) -> if p == E then show n else show p) rows'
   maxLen = maximum . map length $ rows''
   rows''' = map (take maxLen . (++ repeat ' ')) rows''
   rows = map ((++ "\n") . intercalate "|") $ boardTo2D rows'''
@@ -139,3 +140,25 @@ boardToString b = intercalate divider rows where
 instance PlayableGame TTTBoard where
   showBoard = boardToString
   showMoves = show
+
+board1 :: TTTBoard
+board1 = concat [[X, X, X],
+                 [O, O, X],
+                 [X, O, O]]
+
+board2 :: TTTBoard
+board2 = concat [[X, X, O],
+                 [O, O, X],
+                 [X, O, O]]
+
+board3 :: TTTBoard
+board3 = concat [[O, O, O],
+                 [O, X, X],
+                 [X, X, E]]
+
+
+testPrimitive :: Test
+testPrimitive = TestList $
+                [Win ~=? primitive board1,
+                 Tie ~=? primitive board2,
+                 Lose ~=? primitive board3]

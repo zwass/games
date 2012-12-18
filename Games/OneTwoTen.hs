@@ -2,6 +2,7 @@
 
 module Games.OneTwoTen where
 
+import Test.HUnit
 import Data.Binary
 
 import Solver
@@ -37,3 +38,9 @@ ottPrimitive b
   | ottBoard b < boardSize = Undecided
   | turn b == PlayerOne = Lose
   | otherwise = Win
+
+testPrimitive :: Test
+testPrimitive = TestList $
+                [Lose ~=? ottPrimitive (OTTBoard PlayerOne 10),
+                 Win ~=? ottPrimitive (OTTBoard PlayerTwo 10),
+                 Undecided ~=? ottPrimitive (OTTBoard PlayerOne 9)]
