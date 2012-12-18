@@ -8,6 +8,7 @@ import Data.List
 import Data.List.Split
 
 import Solver
+import PlayableGame
 
 data Piece = Empty | X | O
            deriving (Show, Eq, Ord)
@@ -36,7 +37,7 @@ boardSize :: Int
 boardSize = 3
 
 tttGetInitialPosition :: TTTBoard
-tttGetInitialPosition = take (boardSize * boardSize) $ repeat Empty
+tttGetInitialPosition = replicate (boardSize * boardSize) Empty
 
 --Returns a count of each type of piece, Xs first
 pieceCounts :: TTTBoard -> (Int, Int)
@@ -62,7 +63,7 @@ tttDoMove b m = case (tttWhoseTurn b) of
   PlayerTwo -> placePiece m O b
 
 boardTo2D :: [a] -> [[a]]
-boardTo2D = chunksOf boardSize
+boardTo2D = splitEvery boardSize
 
 --get all possible indices on the 2D board. This useful?
 indexPerms :: [(Int, Int)]
