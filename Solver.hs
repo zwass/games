@@ -2,8 +2,10 @@
 
 module Solver (SolvableGame(..), PlayableGame(..),
                Player (..), Move, Value(..), GameTree,
-               solveGame, getValue, nextPlayer,) where
+               solveGame, getValue, nextPlayer, loadOrSolveTree) where
 
+import qualified Control.Exception as E
+--import System.IO.Error (catchIOError)
 import Data.Binary
 import qualified Data.Map as M
 import Data.Map (Map)
@@ -102,3 +104,17 @@ solveGame = S.execState (solve initialPosition) M.empty where
 getValue :: SolvableGame a => a -> Value
 getValue x = M.findWithDefault (error $ "No value for " ++ show x) x solveGame
             
+loadOrSolveTree :: (Binary a, SolvableGame a) =>
+                   FilePath -> IO (GameTree a)
+loadOrSolveTree fname = do
+  putStrLn $ "Loading game tree from file " ++ fname
+  t <- E.catch (decodeFile fname) handler
+  putStrLn $ "Game tree loaded"
+  return t where
+    handler :: (Binary a, SolvableGame a) =>
+               E.SomeException -> IO (GameTree a)
+    handler _ = do
+      putStrLn "Error loading game tree... Generating new tree."
+      let t = solveGame
+      encodeFile fname t
+      return t

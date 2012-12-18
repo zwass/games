@@ -26,10 +26,16 @@ initGame = do
   optS <- getLine
   let opt = parseMainMenuOption optS
   case opt of
-    Just 1 -> evalStateT playGame (ST (solveGame :: GameTree OTTBoard) (initialPosition))
-    Just 2 -> evalStateT playGame (ST (solveGame :: GameTree TTTBoard) (initialPosition))
-    Just 3 -> evalStateT playGame (ST (solveGame :: GameTree C4Board) (initialPosition))
-    _ -> do { putStrLn "Unrecognized option"; initGame }
+    Just 1 -> do
+      t <- loadOrSolveTree "ott_tree" :: IO (GameTree OTTBoard)
+      evalStateT playGame $ ST t initialPosition
+    Just 2 -> do
+      t <- loadOrSolveTree "ttt_tree" :: IO (GameTree TTTBoard)
+      evalStateT playGame $ ST t initialPosition
+    Just 3 -> do
+      t <- loadOrSolveTree "c4_tree" :: IO (GameTree C4Board)
+      evalStateT playGame $ ST t initialPosition
+    _ -> do { putStrLn "Unrecognized option"; initGame } where
 
 parseMainMenuOption :: String -> Maybe Int
 parseMainMenuOption s = case reads s of
