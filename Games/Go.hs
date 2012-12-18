@@ -258,9 +258,9 @@ instance Show IState where
 showPosition :: Position -> String
 showPosition p = unlines sRows
     where
-        n = floor $ sqrt $ fromIntegral $ M.size p
+        n = floor $ (sqrt $ fromIntegral $ M.size p :: Double)
         rows :: [[IState]]
-        rows = chunk n (M.elems p)
+        rows = chunksOf n (M.elems p)
         sRows :: [String]
         sRows = P.map (concatMap show) rows
 
