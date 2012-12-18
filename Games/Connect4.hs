@@ -50,7 +50,7 @@ instance Show Piece where
 type C4Board = [[Piece]]
 
 boardWidth :: Int
-boardWidth = 4
+boardWidth = 5
 
 boardHeight :: Int
 boardHeight = 4

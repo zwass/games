@@ -43,5 +43,5 @@ parseMainMenuOption s = case reads s of
   _ -> Nothing
 
                                        
-main :: IO ()
-main = do { initGame; main }
+runPlayer :: IO ()
+runPlayer = do { initGame; runPlayer}
