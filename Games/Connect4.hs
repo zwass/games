@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 {-# OPTIONS -Wall #-}
 
-module Connect4 where
+module Games.Connect4 where
 
 import Data.Binary
 import Data.List (transpose, group, intercalate)

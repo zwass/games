@@ -8,9 +8,9 @@ import Solver
 import PlayableGame
 import SerializableGame
 
-import OneTwoTen
-import TicTacToe
-import Connect4
+import Games.OneTwoTen
+import Games.TicTacToe
+import Games.Connect4
 -- import Go
 
 
