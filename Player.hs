@@ -3,6 +3,7 @@
 module Player where
 
 import Control.Monad.State.Lazy
+import Data.Map as M
 
 import Solver
 import PlayableGame
@@ -11,7 +12,7 @@ import SerializableGame
 import Games.OneTwoTen
 import Games.TicTacToe
 import Games.Connect4
--- import Go
+import Games.Go
 
 
 initGame :: IO ()
@@ -33,7 +34,7 @@ initGame = do
     Just 3 -> do
       t <- loadOrSolveTree "c4_tree" :: IO (GameTree C4Board)
       evalStateT playGame $ ST t initialPosition
-    -- Just 4 -> evalStateT playGame $ ST solveHardGame (initialPosition :: GoGame)
+    Just 4 -> evalStateT playGame $ ST M.empty (initialPosition :: GoGame)
     _ -> do { putStrLn "Unrecognized option"; initGame }
 
 parseMainMenuOption :: String -> Maybe Int

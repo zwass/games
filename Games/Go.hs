@@ -1,10 +1,11 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 {-# OPTIONS -Wall #-}
 
-module Go where
+module Games.Go where
 
 import Prelude as P
 import Data.List as L
+import Data.List.Split
 import Data.Map as M
 import Data.Maybe
 import Data.Set as S
@@ -24,7 +25,7 @@ playerColor PlayerTwo = White
 
 -- Go is played on a plain grid of 19 horizontal and 19 vertical lines, called a board.
 data GoGame = GoGame {turn :: Player, position :: Position, history :: [Move]}
-    deriving (Eq, Ord)
+    deriving (Eq)
 
 -- A point on the board where a horizontal line meets a vertical line is called an intersection.
 
@@ -43,7 +44,7 @@ adjacents (I (x, y)) = S.fromList $ P.map I [(x + 1, y), (x - 1, y), (x, y + 1),
 --  1) empty;
 --  2) occupied by a black stone;
 --  3) occupied by a white stone. 
-data IState = Empty | Stone Color deriving (Show, Eq, Ord)
+data IState = Empty | Stone Color deriving (Eq, Ord)
 
 isEmpty :: IState -> Bool
 isEmpty = (== Empty)
@@ -204,7 +205,7 @@ intersectionToMove :: Intersection -> GoGame -> Move
 intersectionToMove i = fst . fromJust . find ((== i) . snd) . zip [1..] . M.keys . position
 
 instance SolvableGame GoGame where
-  initialPosition = goInitialPosition 2
+  initialPosition = goInitialPosition 5
   doMove = goDoMove
   primitive = goPrimitive
   generateMoves = goGenerateMoves
@@ -221,22 +222,51 @@ estimatePosition p
 goEstimatePrimitive :: GoGame -> Value
 goEstimatePrimitive = estimatePosition . position
 
-{-
-instance HardGame GoGame where
-  estimatePrimitive = goEstimatePrimitive
--}
+instance Ord GoGame where
+    compare a b = compare (goEstimatePrimitive b) (goEstimatePrimitive a)
+
+goChooseBest :: [(Move, GoGame)] -> Move
+goChooseBest xs = best
+    where
+        (best, _) = L.maximumBy (\(_, a) (_, b) -> compare a b) xs
+
+-- Dept, alpha, beta, score, position
+alphaBeta' :: Int -> Int -> Int -> (Position -> Int) -> GoGame -> Int
+alphaBeta' _ _ 0 score g = score (position g)
+alphaBeta' a b d score g = minimum $ takeWhile (< a) scores
+    where
+        ms = generateMoves g
+        ps = nextPos g ms
+        scores = P.map (\(_, g') -> alphaBeta' a b (d - 1) score g') ps
+
+alphaBeta :: Int -> (Position -> Int) -> GoGame -> Int
+alphaBeta = alphaBeta' (-100000) 100000
 
 instance PlayableGame GoGame where
   showBoard = show
   showMoves = show
+  chooseBest ms b _ = goChooseBest $ nextPos b ms
 
 
 ---
 
+instance Show IState where
+    show (Stone White) = "W"
+    show (Stone Black) = "B"
+    show (Empty) = "."
+
+showPosition :: Position -> String
+showPosition p = unlines sRows
+    where
+        n = floor $ sqrt $ fromIntegral $ M.size p
+        rows :: [[IState]]
+        rows = chunk n (M.elems p)
+        sRows :: [String]
+        sRows = P.map (concatMap show) rows
 
 
 instance Show GoGame where
-    show b = show $ position b
+    show b = showPosition $ position b
 
 
 genIntersection :: GoGame -> Gen Intersection
