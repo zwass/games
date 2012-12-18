@@ -12,6 +12,7 @@ import Data.Set as S
 import Test.QuickCheck
 
 import Solver
+import PlayableGame
 
 -- Go is a game between two players, called Black and White.
 
@@ -182,9 +183,14 @@ goPrimitive b
 -- 9. The player with more territory wins.
 evalPosition :: Position -> Value
 evalPosition p
-    | M.size (pieces PlayerOne p) > M.size (pieces PlayerTwo p) = Win
-    | M.size (pieces PlayerOne p) < M.size (pieces PlayerTwo p) = Lose
+    | score > 0 = Win
+    | score < 0 = Lose
     | otherwise = Tie
+    where
+        score = scorePosition p
+
+scorePosition :: Position -> Int
+scorePosition p = M.size (pieces PlayerOne p) - M.size (pieces PlayerTwo p)
 
 goWhoseTurn :: GoGame -> Player
 goWhoseTurn = turn
@@ -203,6 +209,22 @@ instance SolvableGame GoGame where
   primitive = goPrimitive
   generateMoves = goGenerateMoves
   whoseTurn = goWhoseTurn
+
+estimatePosition :: Position -> Value
+estimatePosition p
+    | score > 0 = Win
+    | score < 0 = Lose
+    | otherwise = Tie
+    where
+        score = scorePosition p
+
+goEstimatePrimitive :: GoGame -> Value
+goEstimatePrimitive = estimatePosition . position
+
+{-
+instance HardGame GoGame where
+  estimatePrimitive = goEstimatePrimitive
+-}
 
 instance PlayableGame GoGame where
   showBoard = show

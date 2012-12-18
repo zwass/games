@@ -8,6 +8,7 @@ import Data.List (transpose, group, intercalate)
 import Test.HUnit
 
 import Solver
+import PlayableGame
 
 instance SolvableGame C4Board where
   initialPosition = c4GetInitialPosition

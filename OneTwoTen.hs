@@ -5,6 +5,8 @@ module OneTwoTen where
 import Data.Binary
 
 import Solver
+import PlayableGame
+import SerializableGame
 
 data OTTBoard = OTTBoard {turn :: Player,
                           ottBoard :: Integer}
