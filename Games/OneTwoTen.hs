@@ -1,6 +1,6 @@
 {-# OPTIONS -Wall #-}
 
-module OneTwoTen where
+module Games.OneTwoTen where
 
 import Data.Binary
 

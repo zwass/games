@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 {-# OPTIONS -Wall #-}
 
-module TicTacToe where
+module Games.TicTacToe where
 
 import Data.Binary
 import Data.List
